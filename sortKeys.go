@@ -69,7 +69,7 @@ func main() {
 		return p1.distance < p2.distance
 	}
 	decreasingDistance := func(p1, p2 *Planet) bool {
-		return !distance(p1, p2)
+		return distance(p2, p1)
 	}
 
 	// Sort the planets by the various criteria.

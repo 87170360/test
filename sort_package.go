@@ -24,9 +24,16 @@ func (d Data) Swap(i, j int) {
 }
 
 func main() {
-	fmt.Println("Hello,World!")
-	d := []int{1, 2, 3}
+	//fmt.Println("Hello,World!")
+	d := []int{2, 1, 3}
 	d1 := Data{d}
 	r := sort.IsSorted(d1)
 	fmt.Println(r)
+
+	sort.Sort(d1)
+	r = sort.IsSorted(d1)
+	fmt.Println(r)
+
+	//idx := sort.Search(len(d), func(i int) bool { return d[i] == 2 })
+	//fmt.Println(idx)
 }

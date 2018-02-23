@@ -1,3 +1,7 @@
+/*
+优化了less
+*/
+
 package main
 
 import (
@@ -12,7 +16,8 @@ type Change struct {
 	lines    int
 }
 
-type lessFunc func(p1, p2 *Change) bool
+//type lessFunc func(p1, p2 *Change) bool
+type lessFunc func(p1, p2 *Change) int
 
 // multiSorter implements the Sort interface, sorting the changes within.
 type multiSorter struct {
@@ -49,6 +54,7 @@ func (ms *multiSorter) Swap(i, j int) {
 // !Less. Note that it can call the less functions twice per call. We
 // could change the functions to return -1, 0, 1 and reduce the
 // number of calls for greater efficiency: an exercise for the reader.
+/*
 func (ms *multiSorter) Less(i, j int) bool {
 	p, q := &ms.changes[i], &ms.changes[j]
 	// Try all but the last comparison.
@@ -69,6 +75,21 @@ func (ms *multiSorter) Less(i, j int) bool {
 	// the final comparison reports.
 	return ms.less[k](p, q)
 }
+*/
+
+func (ms *multiSorter) Less(i, j int) bool {
+	p, q := &ms.changes[i], &ms.changes[j]
+	for k := 0; k < len(ms.less); k++ {
+		less := ms.less[k]
+		ret := less(p, q)
+		if ret > 0 {
+			return true
+		} else if ret < 0 {
+			return false
+		}
+	}
+	return false
+}
 
 var changes = []Change{
 	{"gri", "Go", 100},
@@ -87,18 +108,64 @@ var changes = []Change{
 // which compares a single field.
 func main() {
 	// Closures that order the Change structure.
-	user := func(c1, c2 *Change) bool {
-		return c1.user < c2.user
+	user := func(c1, c2 *Change) int {
+		switch {
+		case c1.user < c2.user:
+			return 1
+		case c1.user > c2.user:
+			return -1
+		case c1.user == c2.user:
+			return 0
+		}
+		return 0
 	}
-	language := func(c1, c2 *Change) bool {
-		return c1.language < c2.language
+	language := func(c1, c2 *Change) int {
+		switch {
+		case c1.language < c2.language:
+			return 1
+		case c1.language > c2.language:
+			return -1
+		case c1.language < c2.language:
+			return 0
+		}
+		return 0
 	}
-	increasingLines := func(c1, c2 *Change) bool {
-		return c1.lines < c2.lines
+	increasingLines := func(c1, c2 *Change) int {
+		switch {
+		case c1.lines < c2.lines:
+			return 1
+		case c1.lines > c2.lines:
+			return -1
+		case c1.lines < c2.lines:
+			return 0
+		}
+		return 0
 	}
-	decreasingLines := func(c1, c2 *Change) bool {
-		return c1.lines > c2.lines // Note: > orders downwards.
+	decreasingLines := func(c1, c2 *Change) int {
+		switch {
+		case c1.lines > c2.lines:
+			return 1
+		case c1.lines < c2.lines:
+			return -1
+		case c1.lines == c2.lines:
+			return 0
+		}
+		return 0
 	}
+	/*
+		user := func(c1, c2 *Change) bool {
+			return c1.user < c2.user
+		}
+		language := func(c1, c2 *Change) bool {
+			return c1.language < c2.language
+		}
+		increasingLines := func(c1, c2 *Change) bool {
+			return c1.lines < c2.lines
+		}
+		decreasingLines := func(c1, c2 *Change) bool {
+			return c1.lines > c2.lines // Note: > orders downwards.
+		}
+	*/
 
 	// Simple use: Sort by user.
 	OrderedBy(user).Sort(changes)
