@@ -6,12 +6,13 @@ import (
 )
 
 type Person struct {
-	Name string
-	Age  int
+	Name   string
+	Age    int
+	Gender int
 }
 
 func (p *Person) String() string {
-	return fmt.Sprintf("%s:%d", p.Name, p.Age)
+	return fmt.Sprintf("name:%s,age:%d,gender:%d", p.Name, p.Age, p.Gender)
 }
 
 type PersonSorter struct {
@@ -41,18 +42,96 @@ func (by By) Sort(persons []*Person) {
 	sort.Sort(ps)
 }
 
+type By2 func(p1, p2 *Person) int
+
+type PersonSorter2 struct {
+	persons []*Person
+	by      []By2
+}
+
+func (p *PersonSorter2) Sort(persons []*Person) {
+	p.persons = persons
+	sort.Sort(p)
+}
+
+func (p *PersonSorter2) Len() int {
+	return len(p.persons)
+}
+
+func (p *PersonSorter2) Swap(i, j int) {
+	p.persons[i], p.persons[j] = p.persons[j], p.persons[i]
+}
+
+func (p *PersonSorter2) Less(i, j int) bool {
+	for _, v := range p.by {
+		ret := v(p.persons[i], p.persons[j])
+		if ret == 1 {
+			return true
+		} else if ret == -1 {
+			return false
+		}
+	}
+	return false
+}
+
+func OrderBy(by ...By2) *PersonSorter2 {
+	return &PersonSorter2{
+		by: by,
+	}
+}
+
 func main() {
 	s := []*Person{
-		&Person{"Job", 60},
-		&Person{"Jack", 90},
-		&Person{"Bill", 80},
+		&Person{"Job", 62, 0},
+		&Person{"Job", 60, 0},
+		&Person{"Jack", 90, 1},
+		&Person{"Bill", 80, 2},
+		&Person{"Micheal", 81, 2},
 	}
 
-	ByName := func(p1, p2 *Person) bool { return p1.Name < p2.Name }
-	ByAge := func(p1, p2 *Person) bool { return p1.Age < p2.Age }
+	order1 := func(p1, p2 *Person) int {
+		if p1.Name < p2.Name {
+			return 1
+		} else if p1.Name == p2.Name {
+			return 0
+		} else {
+			return -1
+		}
+	}
+	order2 := func(p1, p2 *Person) int {
+		if p1.Age < p2.Age {
+			return 1
+		} else if p1.Age == p2.Age {
+			return 0
+		} else {
+			return -1
+		}
+	}
+	order3 := func(p1, p2 *Person) int {
+		if p1.Gender < p2.Gender {
+			return 1
+		} else if p1.Gender == p2.Gender {
+			return 0
+		} else {
+			return -1
+		}
+	}
 
-	By(ByName).Sort(s)
+	OrderBy(order1).Sort(s)
 	fmt.Println(s)
-	By(ByAge).Sort(s)
+	OrderBy(order1, order2).Sort(s)
 	fmt.Println(s)
+	OrderBy(order3, order2).Sort(s)
+	fmt.Println(s)
+
+	/*
+		ByName := func(p1, p2 *Person) bool { return p1.Name < p2.Name }
+		ByAge := func(p1, p2 *Person) bool { return p1.Age < p2.Age }
+
+		fmt.Println(s)
+		By(ByName).Sort(s)
+		fmt.Println(s)
+		By(ByAge).Sort(s)
+		fmt.Println(s)
+	*/
 }
