@@ -3,10 +3,10 @@ package main
 import "fmt"
 
 func main() {
-	months := [...]string{1: "January", 2: "February"}
-	q1 := months[:]
-	q2 := months[:]
-	q1[1] = "xx"
-	fmt.Println(q1)
-	fmt.Println(q2)
+	s := make([]int, 0, 5)
+	s = append(s, 1)
+	fmt.Println(s)
+
+	s1 := s[:0]
+	fmt.Println(len(s1), cap(s1))
 }
